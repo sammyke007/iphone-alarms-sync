@@ -421,6 +421,30 @@ class IPhoneAlarmsSyncAlarmSensor(
             self.coordinator._save_to_config()
 
     @property
+    def extra_state_attributes(self) -> dict[str, object] | None:
+        if self.entity_description.key != "alarm_id":
+            return None
+
+        alarm = self.coordinator.get_alarm(self._alarm_id)
+        if alarm is None:
+            return None
+
+        return {
+            "label": alarm.label,
+            "time": f"{alarm.hour:02d}:{alarm.minute:02d}",
+            "hour": alarm.hour,
+            "minute": alarm.minute,
+            "enabled": alarm.enabled,
+            "repeats": alarm.repeats,
+            "repeat_days": list(alarm.repeat_days),
+            "allows_snooze": alarm.allows_snooze,
+            "snooze_time": alarm.snooze_time if alarm.allows_snooze else None,
+            "last_event_goes_off_at": alarm.last_event_goes_off_at,
+            "last_event_snoozed_at": alarm.last_event_snoozed_at,
+            "last_event_stopped_at": alarm.last_event_stopped_at,
+        }
+
+    @property
     def native_value(self) -> datetime | str | None:
         alarm = self.coordinator.get_alarm(self._alarm_id)
         if not alarm:
